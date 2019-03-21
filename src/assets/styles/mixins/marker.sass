@@ -1,0 +1,10 @@
+@import '../variables'
+
+=marker($background-color: $color-alternative, $color: white)
+  color: $color
+  font-weight: bold
+  text-transform: uppercase
+  background-color: $background-color
+
+  &:before, &:after
+    content: '\00a0'
