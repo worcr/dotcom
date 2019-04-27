@@ -7,8 +7,8 @@
     section.highlights
       .wrapper
         .highlight
-          h2 Self-contained
-          p Worcr uses embedded SQLite database and its own memory to effectively store and distribute jobs. No need to manually setup third-party dependencies like Redis.
+          h2 Reliable
+          p Worcr uses PostgreSQL database for persistent storage and Redis for cache and speed. RAM limits no more.
         .highlight
           h2 Polyglot
           p Worcr itself is written in Crystal — a fast, statically-typed language on top of LLVM. However, workers can perform jobs in any language of your choice.
@@ -19,19 +19,19 @@
       .wrapper
         .feature
           h3 Dumb workers
-          p In Worcr, workers are dumb executors which wait for a job to come. They don't care about other workers, limits, expirations and so on. All they do is performing jobs assigned to them.
+          p In Worcr, workers are dumb executors which wait for a job to come. They don't care about other workers, limits, expirations and so on. All they do is performing jobs assigned to them. Worcr supports both socket and serverless workers.
         .feature
           h3 Interruptible jobs
           p Jobs can have checkpoints updated during the execution, which would allow them to re-run from certain point in case of unexpected failure. For example, an e-mail sender would continue from certain user ID. Jobs also can have progress to display in UI.
         .feature
           h3 Weights
-          p Do you find youself creating more and more queues like "urgent" and "even more urgent"? The whole concept of queues scales badly, that's why there are no any queues in Worcr. Instead, every job has its own weight. Those which have bigger weight execute earlier.
+          p Do you find youself creating more and more queues like "urgent" and "even more urgent"? The whole concept of queues scales badly, that's why there are no any queues in Worcr. Instead, every job has its own weight. Those which have bigger weight are performed earlier.
         .feature
           h3 Tags
           p Tags can be applied both to jobs and workers. Tag combinations modify weights, affect limits, retries and expirations. For example, jobs with "premium" tag would have a higher weight for workers tagged "premium" too. Or jobs with "stripe" tag would have an overall limit of 1000 calls per minute.
         .feature
           h3 Embedded functions
-          p In Worcr, you can create dynamic limits, retries, expirations and tag modifiers in embeddable languages like Javascript and Lua. This code would be run within Worcr itself and affect the bahavior accordingly.
+          p In Worcr, you can create dynamic limits, retries, expirations and tag modifiers in embeddable languages like Javascript and Lua. This code would be run within Worcr itself and affect the behavior accordingly.
     section.comparison-table
       .wrapper
         .table-wrapper
@@ -67,8 +67,19 @@
                 td
                   img.checkmark(src="/img/heavy_check_mark.svg")
               tr
+              tr
                 td
-                  .title Language-agnostic workers
+                  .title Jobs timeout
+                  .description Constant or programmable job timeouts
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+              tr
+                td
+                  .title Language-agnostic socket workers
                   .description Jobs can be performed in any language
                 td
                   img.checkmark(src="/img/heavy_check_mark.svg")
@@ -98,8 +109,18 @@
                   img.checkmark(src="/img/heavy_check_mark.svg")
               tr
                 td
-                  .title JSON API
-                  .description JSON API wrapper to query statistics and perform common tasks
+                  .title REST API
+                  .description REST API wrapper to query statistics and perform common tasks
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+              tr
+                td
+                  .title GraphQL API
+                  .description GraphQL server for modern businesses
                 td
                   img.checkmark(src="/img/heavy_check_mark.svg")
                 td
@@ -110,6 +131,26 @@
                 td
                   .title Webhooks
                   .description Real-time notifications of events hapenning in Worcr
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+              tr
+                td
+                  .title Multi-threading
+                  .description Single Worcr instance utilizing multiple cores
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+              tr
+                td
+                  .title Clustering
+                  .description Running multiple Worcr nodes for enhanced reliability and performance
                 td
                   img.checkmark(src="/img/heavy_check_mark.svg")
                 td
@@ -148,7 +189,7 @@
                   img.checkmark(src="/img/heavy_check_mark.svg")
               tr
                 td
-                  .title Limits
+                  .title Job limits
                   .description Window, bucket and concurrency limits based on tags and arguments
                 td
                   img.cross(src="/img/ballot_x.svg")
@@ -158,8 +199,18 @@
                   img.checkmark(src="/img/heavy_check_mark.svg")
               tr
                 td
-                  .title Multi-tenancy
-                  .description An ability to distribute jobs evenly based on their arguments
+                  .title Rate limits
+                  .description Rate limiting for third-party services
+                td
+                  img.cross(src="/img/ballot_x.svg")
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+              tr
+                td
+                  .title Lambda workers
+                  .description Use serverless workers to perform jobs
                 td
                   img.cross(src="/img/ballot_x.svg")
                 td
@@ -208,18 +259,8 @@
                   img.checkmark(src="/img/heavy_check_mark.svg")
               tr
                 td
-                  .title Multi-threading
-                  .description Single Worcr instance utilizing multiple cores
-                td
-                  img.cross(src="/img/ballot_x.svg")
-                td
-                  img.checkmark(src="/img/heavy_check_mark.svg")
-                td
-                  img.checkmark(src="/img/heavy_check_mark.svg")
-              tr
-                td
-                  .title Clustering
-                  .description Running multiple Worcr nodes for enhanced reliability and performance
+                  .title Multi-tenancy
+                  .description An ability to distribute jobs evenly based on their arguments
                 td
                   img.cross(src="/img/ballot_x.svg")
                 td
@@ -229,7 +270,7 @@
               tr
                 td
                   .title Authorization
-                  .description Restricting access requiring a user to authenticate
+                  .description Restricting access requiring a user or worker to authenticate
                 td
                   img.cross(src="/img/ballot_x.svg")
                 td
@@ -238,8 +279,18 @@
                   img.checkmark(src="/img/heavy_check_mark.svg")
               tr
                 td
-                  .title Data encryption
-                  .description Encrypting sensitive job arguments on disk
+                  .title Redis cluster support
+                  .description Parallelize processing with multiple Redis nodes
+                td
+                  img.cross(src="/img/ballot_x.svg")
+                td
+                  img.cross(src="/img/ballot_x.svg")
+                td
+                  img.checkmark(src="/img/heavy_check_mark.svg")
+              tr
+                td
+                  .title Improved performance
+                  .description Multiple layers of Redis caching for superior speed
                 td
                   img.cross(src="/img/ballot_x.svg")
                 td
@@ -259,8 +310,12 @@
                 td
                   .title Support
                 td GitHub
-                td GitHub
-                td Twist
+                td
+                  | GitHub,&nbsp;
+                  a(href="https://twist.com") Twist
+                td
+                  | GitHub,&nbsp;
+                  a(href="https://twist.com") Twist
               tr
                 td
                   .title License
